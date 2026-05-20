@@ -209,7 +209,7 @@
     </div>
 
     <script>
-        // --- 音樂自動播放破解 (第一次觸碰螢幕即播放) ---
+        // --- 音樂自動播放破解 ---
         function startMusic() {
             document.getElementById('bgMusic').play().catch(e => console.log("等待互動中"));
             document.body.removeEventListener('touchstart', startMusic);
@@ -276,15 +276,10 @@
             function calculateScratchedPercentage() {
                 const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 let transparentPixels = 0;
-                
                 for (let i = 3; i < pixels.length; i += 4) {
-                    if (pixels[i] === 0) {
-                        transparentPixels++;
-                    }
+                    if (pixels[i] === 0) transparentPixels++;
                 }
-                
-                const totalPixels = pixels.length / 4;
-                return (transparentPixels / totalPixels) * 100;
+                return (transparentPixels / (pixels.length / 4)) * 100;
             }
 
             function scratch(e) {
@@ -317,12 +312,27 @@
             canvas.addEventListener('touchend', () => isDrawing = false);
         }
 
-        // --- 3. 滿螢幕躲避按鈕邏輯 ---
+        // --- 3. 會撒嬌的躲避按鈕邏輯 ---
         const btnNo = document.getElementById('btnNo');
+        let dodgeCount = 0; // 新增計數器，用來算她摸了幾次
 
-        function moveButton() {
-            btnNo.style.position = 'fixed';
+        function handleAvoid(e) {
+            if (e) e.preventDefault();
             
+            dodgeCount++; // 每次觸碰就 +1
+
+            if (dodgeCount === 4) {
+                // 第 4 次跳出警告
+                alert('妳妳妳醬我要哭哭嘍');
+            } else if (dodgeCount === 8) {
+                // 第 8 次直接沒收按鈕
+                alert('😡我不準啦');
+                btnNo.style.display = 'none';
+                return; // 結束函數，按鈕消失不跑了
+            }
+
+            // 繼續躲避
+            btnNo.style.position = 'fixed';
             const maxX = window.innerWidth - btnNo.offsetWidth - 20; 
             const maxY = window.innerHeight - btnNo.offsetHeight - 20;
             
@@ -334,11 +344,9 @@
             btnNo.style.transform = 'none';
         }
 
-        btnNo.addEventListener('mouseover', moveButton);
-        btnNo.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            moveButton();
-        });
+        // 將滑鼠移過或手機觸碰的事件，綁定到新寫的 handleAvoid 上
+        btnNo.addEventListener('mouseover', handleAvoid);
+        btnNo.addEventListener('touchstart', handleAvoid);
 
         // --- 4. 按下 Yes 之後的邏輯 ---
         function sayYes() {

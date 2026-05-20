@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 520 ❤️</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fff0f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        h1 { color: #ff6b81; font-size: 1.6rem; margin-bottom: 5px; line-height: 1.4; }
+        p { font-size: 1.1rem; line-height: 1.5; color: #666; margin-top: 10px; }
+        
+        /* 輸入框樣式 (包含密碼框) */
+        input[type="text"] {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border: 2px solid #ff6b81;
+            border-radius: 10px;
+            outline: none;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            color: #ff6b81;
+            font-weight: bold;
+            background: #fff0f5;
+            text-align: center;
+            width: 70%;
+            letter-spacing: 2px;
+        }
+
+        /* 假月曆樣式 */
+        .fake-calendar {
+            margin-top: 20px;
+            border: 2px solid #ffb6c1;
+            border-radius: 10px;
+            padding: 15px;
+            background: #fff;
+        }
+        .cal-header { font-weight: bold; font-size: 1.2rem; color: #ff6b81; margin-bottom: 10px; }
+        .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 0.9rem; color: #888; margin-bottom: 10px; }
+        .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day {
+            padding: 10px 0;
+            background: #fff0f5;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #ff6b81;
+            transition: 0.2s;
+        }
+        .cal-day:hover, .cal-day:active { background: #ff6b81; color: white; }
+
+        /* 階段隱藏與動畫 */
+        #step1, #step2 { display: none; animation: fadeIn 1s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 刮刮樂區域（合照） */
+        .scratch-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 400px; 
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .scratch-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            pointer-events: none;
+        }
+        canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            cursor: crosshair;
+        }
+
+        /* 隱藏區域：刮完才顯示 */
+        #hiddenSection {
+            display: none;
+            animation: fadeIn 1.5s ease-in-out;
+            margin-top: 30px;
+        }
+
+        .photo-gallery img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        /* 躲避按鈕區域 */
+        .action-area {
+            position: relative;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 20px;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+        .action-area h2 { color: #ff6b81; font-size: 1.2rem; margin-bottom: 20px; }
+        .btn {
+            padding: 12px 20px; font-size: 1.1rem;
+            border: none; border-radius: 25px;
+            cursor: pointer; font-weight: bold;
+            color: white; transition: 0.1s;
+        }
+        .btn-yes { background-color: #ff6b81; width: 80%; margin-bottom: 15px; }
+        .btn-yes:hover { background-color: #ff4760; transform: scale(1.05); }
+        
+        .btn-no {
+            background-color: #ccc;
+            white-space: nowrap;
+            z-index: 9999;
+        }
+
+        /* 最後一張照片：點完 Yes 才顯示 */
+        #finalPhotoSection {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        #finalPhotoSection img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container" id="step0">
+        <h1>隨堂小考ŸJ的生日！</h1>
+        <p>*西元年月日哦(ᯅ̈ )</p>
+        <input type="text" id="pwdInput" placeholder="例如: 20260520" inputmode="numeric">
+        <br>
+        <button class="btn btn-yes" style="width: 60%;" onclick="checkPassword()">確認送出</button>
+    </div>
+
+    <div class="container" id="step1">
+        <h1>Hi ŸC 👋</h1>
+        <p>考考你，今天是哪一天？</p>
+        
+        <div class="fake-calendar">
+            <div class="cal-header">2026 年 5 月</div>
+            <div class="cal-weekdays">
+                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div class="cal-days" id="calDays">
+                </div>
+        </div>
+    </div>
+
+    <div class="container" id="step2">
+        <div class="scratch-container">
+            <img src="photo1.jpg" alt="我們的合照">
+            <canvas id="scratchCanvas"></canvas>
+        </div>
+        <h1>Happy 520<br>( ˶ ̇ ̵ ̇˶ )‪‪♡</h1>
+
+        <div id="hiddenSection">
+            <div class="photo-gallery">
+                <img src="photo2.jpg" alt="海邊影子">
+                <img src="photo3.jpg" alt="YC">
+            </div>
+
+            <div class="action-area" id="actionArea">
+                <h2>泥也要一直一直繼續愛我唷</h2>
+                <button class="btn btn-yes" onclick="sayYes()">我會阿！（抱抱）</button>
+                <button class="btn btn-no" id="btnNo">不好 ¨̯ （不嘻嘻）</button>
+            </div>
+
+            <div id="finalPhotoSection">
+                <img src="photo4.jpg" alt="驚喜照片">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. 密碼檢查邏輯 ---
+        function checkPassword() {
+            const pwd = document.getElementById('pwdInput').value;
+            if (pwd === '19980728') {
+                alert('答對啦！過關 🎉');
+                document.getElementById('step0').style.display = 'none';
+                document.getElementById('step1').style.display = 'block';
+            } else {
+                alert('嗶嗶！答錯了 ❌ 再給你一次機會！');
+                document.getElementById('pwdInput').value = '';
+            }
+        }
+
+        // --- 1. 霸道月曆生成邏輯 ---
+        const calDays = document.getElementById('calDays');
+        for (let i = 0; i < 35; i++) {
+            let dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day';
+            dayDiv.innerText = '20';
+            dayDiv.onclick = function() {
+                document.getElementById('bgMusic').play().catch(e => console.log("等待互動"));
+                alert('沒錯！就是今天 ✨');
+                
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
+                initScratchCard();
+            };
+            calDays.appendChild(dayDiv);
+        }
+
+        // --- 2. 刮刮樂邏輯 ---
+        function initScratchCard() {
+            const canvas = document.getElementById('scratchCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            ctx.fillStyle = '#d3d3d3';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#888888';
+            ctx.textAlign = 'center';
+            ctx.fillText('用手指刮開看看 ✨', canvas.width / 2, canvas.height / 2);
+
+            let isDrawing = false;
+            let scratchCount = 0; 
+            let isRevealed = false; 
+
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getMousePos(e);
+                
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2); 
+                ctx.fill();
+
+                scratchCount++;
+                if (scratchCount > 80 && !isRevealed) {
+                    isRevealed = true;
+                    document.getElementById('hiddenSection').style.display = 'block';
+                    window.scrollBy({ top: 300, behavior: 'smooth' });
+                }
+            }
+
+            canvas.addEventListener('mousedown', () => isDrawing = true);
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('touchmove', scratch);
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        // --- 3. 滿螢幕躲避按鈕邏輯 ---
+        const btnNo = document.getElementById('btnNo');
+
+        function moveButton() {
+            btnNo.style.position = 'fixed';
+            
+            const maxX = window.innerWidth - btnNo.offsetWidth - 20; 
+            const maxY = window.innerHeight - btnNo.offsetHeight - 20;
+            
+            const newX = Math.max(10, Math.random() * maxX);
+            const newY = Math.max(10, Math.random() * maxY);
+
+            btnNo.style.left = `${newX}px`;
+            btnNo.style.top = `${newY}px`;
+            btnNo.style.transform = 'none';
+        }
+
+        btnNo.addEventListener('mouseover', moveButton);
+        btnNo.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            moveButton();
+        });
+
+        // --- 4. 按下 Yes 之後的邏輯 ---
+        function sayYes() {
+            // 文字更新為沒有「最愛你了」
+            alert('我就知道！❤️ (抱緊處理)');
+            
+            document.getElementById('actionArea').style.display = 'none';
+            
+            const finalPhoto = document.getElementById('finalPhotoSection');
+            finalPhoto.style.display = 'block';
+            
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+    </script>
+
+</body>
+</html>

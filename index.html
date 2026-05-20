@@ -247,7 +247,7 @@
             calDays.appendChild(dayDiv);
         }
 
-        // --- 2. 精準 70% 刮刮樂邏輯 ---
+        // --- 2. 精準 93% 刮刮樂邏輯 ---
         function initScratchCard() {
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
@@ -294,7 +294,7 @@
 
                 if (!isRevealed) {
                     const percent = calculateScratchedPercentage();
-                    if (percent >= 70) {
+                    if (percent >= 93) {  // 改為 93% 才解鎖
                         isRevealed = true;
                         document.getElementById('hiddenSection').style.display = 'block';
                         window.scrollBy({ top: 300, behavior: 'smooth' });
@@ -314,24 +314,21 @@
 
         // --- 3. 會撒嬌的躲避按鈕邏輯 ---
         const btnNo = document.getElementById('btnNo');
-        let dodgeCount = 0; // 新增計數器，用來算她摸了幾次
+        let dodgeCount = 0; 
 
         function handleAvoid(e) {
             if (e) e.preventDefault();
             
-            dodgeCount++; // 每次觸碰就 +1
+            dodgeCount++; 
 
             if (dodgeCount === 4) {
-                // 第 4 次跳出警告
                 alert('妳妳妳醬我要哭哭嘍');
             } else if (dodgeCount === 8) {
-                // 第 8 次直接沒收按鈕
-                alert('😡我不准啦');
+                alert('😡我不准啦');  // 改為「准」
                 btnNo.style.display = 'none';
-                return; // 結束函數，按鈕消失不跑了
+                return; 
             }
 
-            // 繼續躲避
             btnNo.style.position = 'fixed';
             const maxX = window.innerWidth - btnNo.offsetWidth - 20; 
             const maxY = window.innerHeight - btnNo.offsetHeight - 20;
@@ -344,7 +341,6 @@
             btnNo.style.transform = 'none';
         }
 
-        // 將滑鼠移過或手機觸碰的事件，綁定到新寫的 handleAvoid 上
         btnNo.addEventListener('mouseover', handleAvoid);
         btnNo.addEventListener('touchstart', handleAvoid);
 

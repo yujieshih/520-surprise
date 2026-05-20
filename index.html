@@ -247,7 +247,7 @@
             calDays.appendChild(dayDiv);
         }
 
-        // --- 2. 精準 93% 刮刮樂邏輯 ---
+        // --- 2. 精準 97% 刮刮樂邏輯 ---
         function initScratchCard() {
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
@@ -294,7 +294,7 @@
 
                 if (!isRevealed) {
                     const percent = calculateScratchedPercentage();
-                    if (percent >= 93) {  // 改為 93% 才解鎖
+                    if (percent >= 97) {  // 改為 97% 才解鎖
                         isRevealed = true;
                         document.getElementById('hiddenSection').style.display = 'block';
                         window.scrollBy({ top: 300, behavior: 'smooth' });
@@ -324,7 +324,7 @@
             if (dodgeCount === 4) {
                 alert('妳妳妳醬我要哭哭嘍');
             } else if (dodgeCount === 8) {
-                alert('😡我不准啦');  // 改為「准」
+                alert('😡我不准啦');  
                 btnNo.style.display = 'none';
                 return; 
             }
